@@ -18,6 +18,7 @@ function reworkNPM(opts) {
     var prefilter = opts.prefilter || identity;
     var shim = opts.shim || {};
     var alias = opts.alias || {};
+    var moduleDirectory = opts.moduleDirectory;
 
     function inline(scope, style) {
         style.rules = concatMap(style.rules, function(rule) {
@@ -60,11 +61,17 @@ function reworkNPM(opts) {
         var source = rule.position.source;
         var dir = source ? path.dirname(path.resolve(root, source)) : root;
 
-        var file = resolve.sync(name, {
-            basedir: dir,
-            extensions: ['.css'],
-            packageFilter: processPackage
-        });
+        var resolveOpts = {
+          basedir: dir,
+          extensions: ['.css'],
+          packageFilter: processPackage
+        };
+
+        if (moduleDirectory) {
+          resolveOpts.moduleDirectory = moduleDirectory;
+        }
+
+        var file = resolve.sync(name, resolveOpts);
 
         return path.normalize(file);
     }
